@@ -1,0 +1,25 @@
+logger:
+  mod: ${LOGGER_MOD}
+
+server:
+  http_port: ${SERVER_HTTP_PORT}
+  shutdown_timeout: ${SERVER_SHUTDOWN_TIMEOUT}
+
+postgres:
+  host: ${POSTGRES_HOST}
+  port: ${POSTGRES_PORT}
+  username: ${POSTGRES_USERNAME}
+  password: ${POSTGRES_PASSWORD}
+  database: ${POSTGRES_DATABASE}
+
+kafka:
+  brokers:
+    - ${KAFKA_BROKER_URL}
+  topics:
+    input: ${KAFKA_INPUT_TOPIC}
+  consumer:
+    auto_offset_reset: ${KAFKA_CONSUMER_AUTO_OFFSET_RESET}
+    group_id: ${KAFKA_CONSUMER_GROUP_ID}
+  ssl:
+    enabled: ${KAFKA_SSL_ENABLED}
+
