@@ -11,6 +11,7 @@ services:
       - "5435:5432"
     volumes:
       - ./containers-data/pgdata:/var/lib/postgresql/data/pgdata
+      - ./containers-data/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - wb-l0-task
     healthcheck:
@@ -43,19 +44,18 @@ services:
       - wb-l0-task
     restart: unless-stopped
 
-  # Kafka UI (веб-интерфейс для управления)
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: wb-kafka-ui
     environment:
       KAFKA_CLUSTERS_0_NAME: "local-kraft"
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
-      KAFKA_CLUSTERS_0_ZOOKEEPER: ""  # Явно отключаем ZooKeeper
-      KAFKA_CLUSTERS_0_KRAFT: "true"   # Включаем режим KRaft
+      KAFKA_CLUSTERS_0_ZOOKEEPER: ""
+      KAFKA_CLUSTERS_0_KRAFT: "true"
     ports:
-      - "8100:8080"  # Веб-интерфейс
+      - "8100:8080"
     depends_on:
-      - wb-kafka
+      - kafka
     networks:
       - wb-l0-task
     restart: unless-stopped

@@ -5,35 +5,22 @@ tasks:
     cmds:
       - task --list
 
-  migrate_userdb:
-    desc: "Apply migrations on userDB"
+  install:
+    desc: "Install dependencies for application work"
     cmds:
-      - goose -dir migrations/user postgres "postgresql://auth_service:passw0rd1@127.0.0.1:5435/userdb?sslmode=disable" up
+      - GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@latest
 
-  migrate_coredb:
-    desc: "Apply migrations on coreDB"
+  migrate_up:
+    desc: "Apply migrations"
     cmds:
-      - goose -dir migrations/project postgres "postgresql://task_service:passw0rd2@127.0.0.1:5435/coredb?sslmode=disable" up
-
-  generate:
-    aliases:
-      - gen
-    desc: "Generate code from proto files (execute from projects root)"
-    cmds:
-      - rm $(pwd)/gen/* || echo "Directory clean"
-      - protoc -I proto proto/*.proto --go_out=./gen --go_opt=paths=source_relative --go-grpc_out=./gen --go-grpc_opt=paths=source_relative
+      - goose -dir migrations postgres "postgres://order_service_user:Passw0rd@localhost:5435/order_db?sslmode=disable" up
 
   lint:
     desc: "Activate linters"
     cmds:
-      - golangci-lint run auth-service/...
+      - golangci-lint run ./..
 
   tidy:
     desc: "Cleaning go mod"
     cmds:
       - go mod tidy
-
-  all:
-    desc: "Execute all commands to run application"
-    cmds:
-      - task: generate

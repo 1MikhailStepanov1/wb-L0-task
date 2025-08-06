@@ -1,5 +1,6 @@
 .idea
 .DS_Store
 Taskfile.yaml
-containers-data
+containers-data/pgdata/
+containers-data/kafka-data/
 .env
