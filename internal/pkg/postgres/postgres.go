@@ -14,7 +14,7 @@ type Config struct {
 	Database string `mapstructure:"database"`
 }
 
-func NewConnectionPool(config Config) (*pgxpool.Pool, error) {
+func NewConnectionPool(config *Config) (*pgxpool.Pool, error) {
 
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
 		config.User, config.Password, config.Host, config.Port, config.Database,

@@ -11,6 +11,7 @@ import (
 	"wb-L0-task/internal/pkg/kafka"
 	"wb-L0-task/internal/pkg/logger"
 	"wb-L0-task/internal/pkg/postgres"
+	"wb-L0-task/internal/pkg/server"
 )
 
 const defaultConfigFileName = "config.yml"
@@ -18,9 +19,10 @@ const defaultConfigFileName = "config.yml"
 var ErrEmptyPath = errors.New("path to config must not be empty")
 
 type AppConfig struct {
+	Kafka    *kafka.Config
 	Logger   *logger.Config
 	Postgres *postgres.Config
-	Kafka    *kafka.Config
+	Server   *server.Config
 }
 
 func New() (*AppConfig, error) {
