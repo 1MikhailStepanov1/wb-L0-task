@@ -13,6 +13,13 @@ type Order struct {
 	storage *postgres.Order
 }
 
+func New(logger *slog.Logger, storage *postgres.Order) *Order {
+	return &Order{
+		logger:  logger,
+		storage: storage,
+	}
+}
+
 func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order, error) {
 	if exists, err := o.storage.Exists(ctx, orderId); exists && err == nil {
 		res, err := o.storage.GetById(ctx, orderId)

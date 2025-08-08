@@ -59,9 +59,9 @@ func (a *App) Start() error {
 }
 
 // TODO Graceful shutdown
-func (a *App) Stop() {
+func (a *App) Stop(ctx context.Context) error {
 	a.logger.Info("Stopping HTTP server")
-	a.server.Shutdown(context.Background())
+	return a.server.Shutdown(ctx)
 }
 
 func registerRoutes(router *chi.Mux, controller *order.Controller) {

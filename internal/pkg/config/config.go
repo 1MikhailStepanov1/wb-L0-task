@@ -14,7 +14,7 @@ import (
 	"wb-L0-task/internal/pkg/server"
 )
 
-const defaultConfigFileName = "config.yml"
+const defaultConfigFileName = "config.yaml"
 
 var ErrEmptyPath = errors.New("path to config must not be empty")
 

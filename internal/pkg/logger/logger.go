@@ -14,7 +14,7 @@ const (
 	productionLogsMod = "PROD"
 )
 
-func New(cfg Config) *slog.Logger {
+func New(cfg *Config) *slog.Logger {
 	var log *slog.Logger
 	switch cfg.LogMod {
 	case devLogsMod:

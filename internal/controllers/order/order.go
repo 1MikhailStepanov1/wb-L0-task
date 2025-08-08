@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"log/slog"
 	"net/http"
 	model "wb-L0-task/internal/domain/order"
 )
@@ -13,11 +14,15 @@ type Service interface {
 }
 
 type Controller struct {
+	logger  *slog.Logger
 	service Service
 }
 
-func New(service Service) *Controller {
-	return &Controller{service: service}
+func New(logger *slog.Logger, service Service) *Controller {
+	return &Controller{
+		logger:  logger,
+		service: service,
+	}
 }
 
 func (c *Controller) GetOrderById() http.HandlerFunc {
