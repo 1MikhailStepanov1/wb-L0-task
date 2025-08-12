@@ -37,11 +37,6 @@ func (a *App) Run(ctx context.Context) {
 			return
 		default:
 			a.logger.Info("Reading message...")
-			//msg, err := a.consumer.ReadMessage(ctx)
-			//if err != nil {
-			//	a.logger.Error("Error while reading message", "err", err)
-			//	continue
-			//}
 			msg, err := a.consumer.FetchMessage(ctx)
 			if err != nil {
 				a.logger.Error("Error while reading message", "err", err)
@@ -51,7 +46,7 @@ func (a *App) Run(ctx context.Context) {
 			if err = a.consumer.CommitMessages(ctx, msg); err != nil {
 				log.Fatal("failed to commit messages:", err)
 			}
-			a.logger.Info("Received message", string(msg.Value))
+			a.logger.Info("Received message", "kafka msg", string(msg.Value))
 			err = a.service.SaveOrder(ctx, msg.Value)
 			if err != nil {
 				a.logger.Error("Failed to save order", "err", err)

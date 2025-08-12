@@ -129,8 +129,8 @@ func (o *Order) Save(ctx context.Context, order *models.Order) error {
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		_, err := tx.Exec(ctx,
-			`INSERT INTO orders(uid, tack_number, entry, locale, internal_signature, customer_id, delivery_service, 
-                   shardkey, sm_id, oof_shard, date_created) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			`INSERT INTO orders(uid, track_number, entry, locale, internal_signature, customer_id, delivery_service, 
+                   shardkey, sm_id, oof_shard, date_created) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 			order.UID,
 			order.TrackNumber,
 			order.Entry,
@@ -186,9 +186,9 @@ func (o *Order) Save(ctx context.Context, order *models.Order) error {
 		batch := &pgx.Batch{}
 		for _, item := range order.Items {
 			batch.Queue(
-				`INSERT INTO order_items(id, order_uid, chrt_id, track_number, price, rid, name, sale, 
+				`INSERT INTO order_items(order_uid, chrt_id, track_number, price, rid, name, sale, 
                         size, total_price, nm_id, brand, status) 
-						VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 				order.UID,
 				&item.ChartID,
 				&item.TrackNumber,

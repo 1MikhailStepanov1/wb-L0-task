@@ -1,6 +1,31 @@
 package order
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
+
+func (o *Order) UnmarshalJSON(data []byte) error {
+	type Alias Order
+	aux := &struct {
+		DateCreated string `json:"date_created"`
+		*Alias
+	}{
+		Alias: (*Alias)(o),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	if aux.DateCreated != "" {
+		t, err := time.Parse(time.RFC3339, aux.DateCreated)
+		if err != nil {
+			return err
+		}
+		o.DateCreated = t
+	}
+	return nil
+}
 
 type Order struct {
 	UID               string    `json:"order_uid" db:"uid"`
@@ -20,8 +45,8 @@ type Order struct {
 }
 
 type Item struct {
-	ID             int    `json:"id" db:"id"`
-	OrderUID       string `json:"order_uid" db:"order_uid"`
+	ID             int    `json:"-" db:"id"`
+	OrderUID       string `json:"-" db:"order_uid"`
 	ChartID        int64  `json:"chrt_id" db:"chrt_id"`
 	TrackNumber    string `json:"track_number" db:"track_number"`
 	Price          uint   `json:"price" db:"price"`

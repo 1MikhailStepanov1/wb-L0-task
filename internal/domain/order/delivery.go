@@ -3,8 +3,8 @@ package order
 import "github.com/google/uuid"
 
 type Delivery struct {
-	ID       uuid.UUID `json:"id" db:"id"`
-	OrderUID string    `json:"order_uid" db:"order_uid"`
+	ID       uuid.UUID `json:"-" db:"id"`
+	OrderUID string    `json:"-" db:"order_uid"`
 	Name     string    `json:"name" db:"name"`
 	Phone    string    `json:"phone" db:"phone"`
 	Zip      string    `json:"zip" db:"zip"`
