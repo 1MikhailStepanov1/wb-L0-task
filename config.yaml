@@ -13,13 +13,10 @@ postgres:
   database: ${POSTGRES_DATABASE}
 
 kafka:
-  brokers:
-    - ${KAFKA_BROKER_URL}
+  brokers: ${KAFKA_BROKERS_URL}
   topics:
     input: ${KAFKA_INPUT_TOPIC}
   consumer:
     auto_offset_reset: ${KAFKA_CONSUMER_AUTO_OFFSET_RESET}
     group_id: ${KAFKA_CONSUMER_GROUP_ID}
-  ssl:
-    enabled: ${KAFKA_SSL_ENABLED}
 

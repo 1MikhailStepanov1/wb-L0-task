@@ -27,6 +27,10 @@ func main() {
 		application.HTTPApp.Run()
 	}()
 
+	go func() {
+		application.KafkaApp.Run(ctx)
+	}()
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
@@ -39,5 +43,11 @@ func main() {
 		l.Error("HTTP shutdown with error", err)
 	} else {
 		l.Info("HTTP server shut down cleanly")
+	}
+
+	if err = application.KafkaApp.Shutdown(); err != nil {
+		l.Error("Kafka shutdown with error", err)
+	} else {
+		l.Info("Kafka shutdown cleanly")
 	}
 }
