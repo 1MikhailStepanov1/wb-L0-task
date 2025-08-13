@@ -31,7 +31,6 @@ func (c *Controller) GetOrderById() http.HandlerFunc {
 		if orderUID != "" {
 			http.Error(w, "order_uid is required", http.StatusBadRequest)
 			return
-
 		}
 
 		order, err := c.service.GetOrderById(r.Context(), orderUID)

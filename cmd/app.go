@@ -36,7 +36,10 @@ func main() {
 	<-stop
 	l.Info("Shutdown signal received")
 
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), time.Duration(cfg.Server.ShutdownTimeout)*time.Second)
+	shutdownCtx, shutdownCancel := context.WithTimeout(
+		context.Background(),
+		time.Duration(cfg.Server.ShutdownTimeout)*time.Second,
+	)
 	defer shutdownCancel()
 
 	if err = application.HTTPApp.Stop(shutdownCtx); err != nil {

@@ -219,3 +219,124 @@ func (o *Order) Save(ctx context.Context, order *models.Order) error {
 	}
 	return nil
 }
+
+func (o *Order) GetOrders(ctx context.Context, limit int32) ([]models.Order, error) {
+	orders := make([]models.Order, 0, limit)
+	err := o.trManager.Do(ctx, func(ctx context.Context) error {
+		tx := o.getter.DefaultTrOrDB(ctx, o.db)
+
+		rows, err := tx.Query(ctx, "SELECT * FROM orders ORDER BY orders.date_created LIMIT $1", limit)
+		defer rows.Close()
+		if err != nil {
+			return fmt.Errorf("failed to get orders: %w", err)
+		}
+
+		for rows.Next() {
+			var order models.Order
+			err = rows.Scan(
+				&order.UID,
+				&order.TrackNumber,
+				&order.Entry,
+				&order.Locale,
+				&order.InternalSignature,
+				&order.CustomerID,
+				&order.DeliveryService,
+				&order.ShardKey,
+				&order.StockManagementId,
+				&order.DateCreated,
+				&order.OutOfFailureShard,
+			)
+			if err != nil {
+				return fmt.Errorf("failed to scan order: %w", err)
+			}
+
+			err = o.loadOrderDelivery(ctx, tx, &order)
+			if err != nil {
+				return err
+			}
+
+			err = o.loadOrderPayment(ctx, tx, &order)
+			if err != nil {
+				return err
+			}
+
+			err = o.loadOrderItems(ctx, tx, &order)
+			if err != nil {
+				return err
+			}
+
+			orders = append(orders, order)
+		}
+		return rows.Err()
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (o *Order) loadOrderDelivery(ctx context.Context, tx trmpgx.Tr, order *models.Order) error {
+	err := tx.QueryRow(ctx, "SELECT * FROM deliveries WHERE order_uid = $1", order.UID).Scan(
+		&order.Delivery.Name,
+		&order.Delivery.Phone,
+		&order.Delivery.Zip,
+		&order.Delivery.City,
+		&order.Delivery.Address,
+		&order.Delivery.Region,
+		&order.Delivery.Email,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to load order delivery: %w", err)
+	}
+	return nil
+}
+
+func (o *Order) loadOrderPayment(ctx context.Context, tx trmpgx.Tr, order *models.Order) error {
+	err := tx.QueryRow(ctx, "SELECT * FROM payments WHERE order_uid = $1", order.UID).Scan(
+		&order.Payment.TransactionID,
+		&order.Payment.RequestID,
+		&order.Payment.Currency,
+		&order.Payment.Provider,
+		&order.Payment.Amount,
+		&order.Payment.PaymentDT,
+		&order.Payment.Bank,
+		&order.Payment.DeliveryCost,
+		&order.Payment.GoodsTotal,
+		&order.Payment.CustomFee,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to load order payment: %w", err)
+	}
+	return nil
+}
+
+func (o *Order) loadOrderItems(ctx context.Context, tx trmpgx.Tr, order *models.Order) error {
+	items, err := tx.Query(ctx, "SELECT * FROM order_items WHERE order_uid = $1", order.UID)
+	defer items.Close()
+	if err != nil {
+		return fmt.Errorf("failed to load order items: %w", err)
+	}
+
+	for items.Next() {
+		var item models.Item
+		err = items.Scan(
+			&item.ChartID,
+			&item.TrackNumber,
+			&item.Price,
+			&item.RID,
+			&item.Name,
+			&item.Sale,
+			&item.Size,
+			&item.TotalPrice,
+			&item.NomenclatureID,
+			&item.Brand,
+			&item.Status,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to load order item: %w", err)
+		}
+		order.Items = append(order.Items, item)
+	}
+	return nil
+}

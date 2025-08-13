@@ -21,7 +21,7 @@ func NewConsumer(config *Config) (*kafka.Reader, error) {
 		Topic:          config.Topics.Input,
 		GroupID:        config.Consumer.GroupID,
 		MaxBytes:       10e3,
-		CommitInterval: 0,
+		CommitInterval: 0, // Sync mod for native Commit() call
 	})
 
 	return reader, nil

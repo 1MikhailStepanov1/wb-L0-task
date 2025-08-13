@@ -1,6 +1,9 @@
 logger:
   mod: ${LOGGER_MOD}
 
+cache:
+  default_exp_time: ${CACHE_DEFAULT_EXP_TIME}
+
 server:
   http_port: ${SERVER_HTTP_PORT}
   shutdown_timeout: ${SERVER_SHUTDOWN_TIMEOUT}

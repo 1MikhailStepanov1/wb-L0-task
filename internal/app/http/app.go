@@ -25,7 +25,6 @@ func New(
 	config *config.AppConfig,
 	controller *order.Controller,
 ) *App {
-
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)

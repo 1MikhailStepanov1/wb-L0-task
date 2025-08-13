@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"wb-L0-task/internal/pkg/cache"
 	"wb-L0-task/internal/pkg/kafka"
 	"wb-L0-task/internal/pkg/logger"
 	"wb-L0-task/internal/pkg/postgres"
@@ -19,6 +20,7 @@ const defaultConfigFileName = "config.yaml"
 var ErrEmptyPath = errors.New("path to config must not be empty")
 
 type AppConfig struct {
+	Cache    *cache.Config
 	Kafka    *kafka.Config
 	Logger   *logger.Config
 	Postgres *postgres.Config

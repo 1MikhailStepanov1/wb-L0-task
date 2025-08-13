@@ -16,7 +16,16 @@ linters:
     - unconvert
     - unparam
     - unused
-    - misspell
+    - bodyclose
+    - gocritic
+    - gomodguard
+    - whitespace
+
 run:
   timeout: 5m
+  modules-download-mode: readonly
+  build-tags:
+    - integration
+  issues-exit-code: 1
+  tests: false
 
