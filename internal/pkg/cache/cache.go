@@ -38,6 +38,8 @@ func NewCache(config *Config) *Cache {
 	return cache
 }
 
+// Set Add element to cache.
+// If expiration == 0 default expiration time will be used
 func (c *Cache) Set(k string, v any, expiration time.Duration) {
 	if expiration == 0 {
 		expiration = c.defaultExpiration

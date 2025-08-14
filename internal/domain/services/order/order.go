@@ -27,11 +27,19 @@ func New(logger *slog.Logger, cache *cache.Cache, storage *postgres.Order) *Orde
 }
 
 func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order, error) {
+	// Cache search
+	if order, exists := o.cache.Get(orderId); exists {
+		return order.(*model.Order), nil
+	}
+
+	// Get it from DB
 	if exists, err := o.storage.Exists(ctx, orderId); exists && err == nil { //TODO Update error handling from DB
 		res, err := o.storage.GetById(ctx, orderId)
 		if err != nil {
 			return nil, err
 		}
+		// Saving order in cache
+		o.cache.Set(orderId, res, 0)
 		return res, nil
 	} else {
 		return nil, serviceErrors.ErrNotFound.ForEntity("order")
