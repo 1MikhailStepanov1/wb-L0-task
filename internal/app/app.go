@@ -34,7 +34,7 @@ func New(
 
 	ordersCache := cache.NewCache(c.Cache)
 	orderService := order_service.New(logger, ordersCache, orderRepo)
-	err = orderService.InitCache()
+	err = orderService.InitCache(ctx)
 	if err != nil {
 		logger.Error("Failed to init cache", "err", err)
 	}

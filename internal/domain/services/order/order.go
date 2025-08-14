@@ -38,8 +38,28 @@ func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order,
 	}
 }
 
-func (o *Order) InitCache() error {
-	orders, err := o.storage.GetOrders(context.Background(), initCacheSize)
+func (o *Order) InitCache(ctx context.Context) error {
+	o.logger.Info("Initializing orders cache", "cache_size", initCacheSize)
+	orders, err := o.storage.GetOrders(ctx, initCacheSize)
+	for _, order := range orders {
+		delivery, err := o.storage.GetOrderDelivery(ctx, order.UID)
+		if err != nil {
+			return err
+		}
+		order.Delivery = *delivery
+
+		payment, err := o.storage.GetOrderPayment(ctx, order.UID)
+		if err != nil {
+			return err
+		}
+		order.Payment = *payment
+
+		items, err := o.storage.GetOrderItems(ctx, order.UID)
+		if err != nil {
+			return err
+		}
+		order.Items = items
+	}
 	if err != nil {
 		return err
 	}
