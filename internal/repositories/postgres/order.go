@@ -111,7 +111,7 @@ func (o *Order) GetById(ctx context.Context, orderUID string) (*models.Order, er
 }
 
 func (o *Order) Exists(ctx context.Context, orderUID string) (bool, error) {
-	var exists bool
+	var exists int8
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		return tx.QueryRow(ctx, "SELECT 1 FROM orders WHERE uid = $1", orderUID).Scan(&exists)
@@ -122,7 +122,7 @@ func (o *Order) Exists(ctx context.Context, orderUID string) (bool, error) {
 		}
 		return false, fmt.Errorf("failed to check if order exists: %w", err)
 	}
-	return exists, nil
+	return true, nil
 }
 
 func (o *Order) Save(ctx context.Context, order *models.Order) error {

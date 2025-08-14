@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WB Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .search-form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 300px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .order-list {
+            margin-top: 20px;
+        }
+        .order-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .order-id {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .order-date {
+            color: #7f8c8d;
+        }
+        .order-details {
+            margin-top: 10px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 150px;
+        }
+        .loading {
+            color: #7f8c8d;
+            padding: 15px;
+        }
+        .error {
+            color: red;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+<h1>WB L0 Task</h1>
+
+<div class="search-form">
+    <form id="orderForm">
+        <div class="form-group">
+            <label for="order_uid">Order ID:</label>
+            <input type="text" id="order_uid" name="order_uid" placeholder="Enter order UID">
+        </div>
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<div class="order-list" id="orderList">
+    <div class="loading">Enter order UID or click "Load All Orders"</div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:8080';
+    const orderList = document.getElementById('orderList');
+    const orderForm = document.getElementById('orderForm');
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    }
+
+    function createOrderCard(order) {
+        return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <span class="order-id">Order #${order.order_uid}</span>
+                        <span class="order-date">${formatDate(order.date_created)}</span>
+                    </div>
+                    <div class="order-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Track Number:</span>
+                            <span>${order.track_number}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Customer:</span>
+                            <span>${order.delivery.name}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Delivery Address:</span>
+                            <span>${order.delivery.city}, ${order.delivery.address}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Payment Amount:</span>
+                            <span>${order.payment.amount} ${order.payment.currency}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Items:</span>
+                            <span>${order.items.length}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    async function loadOrders(endpoint) {
+        orderList.innerHTML = '<div class="loading">Loading orders...</div>';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`);
+            if (!response.ok) {
+                console.log(response)
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const order = await response.json();
+
+            if (order.length === 0) {
+                orderList.innerHTML = '<div class="loading">No orders found</div>';
+                return;
+            }
+
+            orderList.innerHTML = '';
+            orderList.innerHTML += createOrderCard(order);
+        } catch (error) {
+            orderList.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            console.error('Error fetching orders:', error);
+        }
+    }
+
+    orderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const orderUid = document.getElementById('order_uid').value.trim();
+        if (orderUid) {
+            await loadOrders(`/order/${encodeURIComponent(orderUid)}`);
+        }
+    });
+
+</script>
+</body>
+</html>

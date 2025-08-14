@@ -28,7 +28,7 @@ func New(logger *slog.Logger, service Service) *Controller {
 func (c *Controller) GetOrderById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		orderUID := chi.URLParam(r, "order_uid")
-		if orderUID != "" {
+		if orderUID == "" {
 			http.Error(w, "order_uid is required", http.StatusBadRequest)
 			return
 		}

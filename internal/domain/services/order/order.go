@@ -27,7 +27,7 @@ func New(logger *slog.Logger, cache *cache.Cache, storage *postgres.Order) *Orde
 }
 
 func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order, error) {
-	if exists, err := o.storage.Exists(ctx, orderId); exists && err == nil {
+	if exists, err := o.storage.Exists(ctx, orderId); exists && err == nil { //TODO Update error handling from DB
 		res, err := o.storage.GetById(ctx, orderId)
 		if err != nil {
 			return nil, err
