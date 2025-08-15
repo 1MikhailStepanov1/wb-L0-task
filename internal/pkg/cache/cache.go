@@ -11,23 +11,23 @@ type Config struct {
 	defaultExpirationTime int16 `mapstructure:"default_exp_time"`
 }
 
-type Item struct {
-	Value        any
+type Item[T any] struct {
+	Value        T
 	CreationTime time.Time
 	Expiration   int64
 }
 
-type Cache struct {
+type Cache[T any] struct {
 	sync.RWMutex
-	items             map[string]Item
+	items             map[string]Item[T]
 	defaultExpiration time.Duration
 	cleanupInterval   time.Duration
 }
 
-func NewCache(config *Config) *Cache {
-	items := make(map[string]Item)
+func NewCache[T any](config *Config) *Cache[T] {
+	items := make(map[string]Item[T])
 
-	cache := &Cache{
+	cache := &Cache[T]{
 		items:             items,
 		defaultExpiration: time.Duration(config.defaultExpirationTime) * time.Second,
 		cleanupInterval:   defaultCleanupInterval,
@@ -40,38 +40,38 @@ func NewCache(config *Config) *Cache {
 
 // Set Add element to cache.
 // If expiration == 0 default expiration time will be used
-func (c *Cache) Set(k string, v any, expiration time.Duration) {
+func (c *Cache[T]) Set(k string, v T, expiration time.Duration) {
 	if expiration == 0 {
 		expiration = c.defaultExpiration
 	}
 	c.Lock()
 	defer c.Unlock()
 
-	c.items[k] = Item{
+	c.items[k] = Item[T]{
 		Value:        v,
 		CreationTime: time.Now(),
 		Expiration:   time.Now().Add(expiration).UnixNano(),
 	}
 }
 
-func (c *Cache) Get(k string) (any, bool) {
+func (c *Cache[T]) Get(k string) (T, bool) {
 	c.RLock()
 	defer c.RUnlock()
-
+	var zeroValue T
 	item, ok := c.items[k]
 	if !ok {
-		return nil, false
+		return zeroValue, false
 	}
 
 	if item.Expiration > 0 {
 		if time.Now().UnixNano() > item.Expiration {
-			return nil, false
+			return zeroValue, false
 		}
 	}
 	return item.Value, true
 }
 
-func (c *Cache) StartGC() {
+func (c *Cache[T]) StartGC() {
 	for {
 		<-time.After(c.cleanupInterval)
 
@@ -85,7 +85,7 @@ func (c *Cache) StartGC() {
 	}
 }
 
-func (c *Cache) expiredKeys() (keys []string) {
+func (c *Cache[T]) expiredKeys() (keys []string) {
 	c.RLock()
 
 	defer c.RUnlock()
@@ -99,7 +99,7 @@ func (c *Cache) expiredKeys() (keys []string) {
 	return
 }
 
-func (c *Cache) clearItems(keys []string) {
+func (c *Cache[T]) clearItems(keys []string) {
 	c.Lock()
 
 	defer c.Unlock()

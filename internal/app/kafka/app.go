@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"github.com/segmentio/kafka-go"
 	"log"
 	"log/slog"
@@ -42,9 +41,12 @@ func (a *App) Run(ctx context.Context) {
 				a.logger.Error("Error while reading message", "err", err)
 				continue
 			}
-			fmt.Printf(
-				"message at topic/partition/offset %v/%v/%v: %s = %s\n",
-				msg.Topic, msg.Partition, msg.Offset, string(msg.Key), string(msg.Value),
+			a.logger.Info("Message received",
+				"topic", msg.Topic,
+				"partition", msg.Partition,
+				"offset", msg.Offset,
+				"Key", string(msg.Key),
+				"Value", string(msg.Value),
 			)
 			if err = a.consumer.CommitMessages(ctx, msg); err != nil {
 				log.Fatal("failed to commit messages:", err)

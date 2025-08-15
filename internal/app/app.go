@@ -6,6 +6,7 @@ import (
 	"wb-L0-task/internal/app/http"
 	"wb-L0-task/internal/app/kafka"
 	order_controller "wb-L0-task/internal/controllers/order"
+	"wb-L0-task/internal/domain/order"
 	order_service "wb-L0-task/internal/domain/services/order"
 	"wb-L0-task/internal/pkg/cache"
 	"wb-L0-task/internal/pkg/config"
@@ -32,7 +33,7 @@ func New(
 
 	orderRepo := repo_pkg.NewOrder(pool, trManager, ctxGetter)
 
-	ordersCache := cache.NewCache(c.Cache)
+	ordersCache := cache.NewCache[order.Order](c.Cache)
 	orderService := order_service.New(logger, ordersCache, orderRepo)
 	err = orderService.InitCache(ctx)
 	if err != nil {

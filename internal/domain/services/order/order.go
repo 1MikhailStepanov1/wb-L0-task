@@ -15,10 +15,10 @@ const initCacheSize = 10
 type Order struct {
 	logger  *slog.Logger
 	storage *postgres.Order
-	cache   *cache.Cache
+	cache   *cache.Cache[model.Order]
 }
 
-func New(logger *slog.Logger, cache *cache.Cache, storage *postgres.Order) *Order {
+func New(logger *slog.Logger, cache *cache.Cache[model.Order], storage *postgres.Order) *Order {
 	return &Order{
 		logger:  logger,
 		storage: storage,
@@ -29,7 +29,7 @@ func New(logger *slog.Logger, cache *cache.Cache, storage *postgres.Order) *Orde
 func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order, error) {
 	// Cache search
 	if order, exists := o.cache.Get(orderId); exists {
-		return order.(*model.Order), nil
+		return &order, nil
 	}
 
 	// Get it from DB
@@ -39,7 +39,7 @@ func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order,
 			return nil, err
 		}
 		// Saving order in cache
-		o.cache.Set(orderId, res, 0)
+		o.cache.Set(orderId, *res, 0)
 		return res, nil
 	} else {
 		return nil, serviceErrors.ErrNotFound.ForEntity("order")
@@ -49,24 +49,27 @@ func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order,
 func (o *Order) InitCache(ctx context.Context) error {
 	o.logger.Info("Initializing orders cache", "cache_size", initCacheSize)
 	orders, err := o.storage.GetOrders(ctx, initCacheSize)
-	for _, order := range orders {
-		delivery, err := o.storage.GetOrderDelivery(ctx, order.UID)
+	for i := range orders {
+		delivery, err := o.storage.GetOrderDelivery(ctx, orders[i].UID)
 		if err != nil {
+			o.logger.Error("Failed to get order delivery", "order_uid", orders[i].UID, "error", err)
 			return err
 		}
-		order.Delivery = *delivery
+		orders[i].Delivery = *delivery
 
-		payment, err := o.storage.GetOrderPayment(ctx, order.UID)
+		payment, err := o.storage.GetOrderPayment(ctx, orders[i].UID)
 		if err != nil {
+			o.logger.Error("Failed to get order payment", "order_uid", orders[i].UID, "error", err)
 			return err
 		}
-		order.Payment = *payment
+		orders[i].Payment = *payment
 
-		items, err := o.storage.GetOrderItems(ctx, order.UID)
+		items, err := o.storage.GetOrderItems(ctx, orders[i].UID)
 		if err != nil {
+			o.logger.Error("Failed to get order items", "order_uid", orders[i].UID, "error", err)
 			return err
 		}
-		order.Items = items
+		orders[i].Items = items
 	}
 	if err != nil {
 		return err
