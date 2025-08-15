@@ -27,7 +27,7 @@ type Order struct {
 	InternalSignature string    `json:"internal_signature"`
 	CustomerID        string    `json:"customer_id"`
 	DeliveryService   string    `json:"delivery_service"`
-	ShardKey          string    `json:"shard_key"`
+	ShardKey          string    `json:"shardkey"`
 	StockManagementId int       `json:"sm_id"`
 	DateCreated       time.Time `json:"date_created"`
 	OutOfFailureShard string    `json:"oof_shard"`
@@ -123,7 +123,7 @@ func generatePayment() *Payment {
 		Currency:      generateRandomString(3, rand.Intn(3)),
 		Provider:      generateRandomString(3, rand.Intn(10)),
 		Amount:        uint(rand.Intn(10000000)),
-		PaymentDT:     time.Now().Add(time.Duration(rand.Intn(1000)) * time.Minute).UnixNano(),
+		PaymentDT:     time.Now().Add(time.Duration(rand.Intn(1000)) * time.Minute).Unix(),
 		Bank:          generateRandomString(3, rand.Intn(15)),
 		DeliveryCost:  uint(rand.Intn(10000)),
 		GoodsTotal:    uint(rand.Intn(1000000)),
@@ -164,10 +164,10 @@ func generateOrder() *Order {
 		InternalSignature: generateRandomString(1, rand.Intn(100)),
 		CustomerID:        generateRandomString(3, rand.Intn(25)),
 		DeliveryService:   generateRandomString(3, rand.Intn(15)),
-		ShardKey:          generateRandomString(2, rand.Intn(1)),
+		ShardKey:          generateRandomString(2, rand.Intn(5)),
 		StockManagementId: rand.Intn(10000),
 		DateCreated:       time.Now().Add(time.Duration(rand.Intn(1000)) * time.Minute),
-		OutOfFailureShard: generateRandomString(2, rand.Intn(1)),
+		OutOfFailureShard: generateRandomString(2, rand.Intn(5)),
 	}
 }
 

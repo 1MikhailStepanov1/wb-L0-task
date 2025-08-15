@@ -38,10 +38,10 @@ type Order struct {
 	InternalSignature string    `json:"internal_signature" db:"internal_signature"`
 	CustomerID        string    `json:"customer_id" db:"customer_id"`
 	DeliveryService   string    `json:"delivery_service" db:"delivery_service"`
-	ShardKey          string    `json:"shard_key" db:"shard_key"`
+	ShardKey          string    `json:"shardkey" db:"shardkey"`
 	StockManagementId int       `json:"sm_id" db:"sm_id"`
 	DateCreated       time.Time `json:"date_created" db:"date_created"`
-	OutOfFailureShard string    `json:"oof_shard"`
+	OutOfFailureShard string    `json:"oof_shard" db:"oof_shard"`
 }
 
 type Item struct {

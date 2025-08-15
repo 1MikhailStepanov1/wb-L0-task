@@ -40,6 +40,8 @@ func (c *Controller) GetOrderById() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(order)
+		if err = json.NewEncoder(w).Encode(order); err != nil {
+			c.logger.Error("Failed to encode response", "err", err)
+		}
 	}
 }
