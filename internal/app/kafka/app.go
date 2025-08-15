@@ -2,7 +2,9 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"github.com/segmentio/kafka-go"
+	"io"
 	"log"
 	"log/slog"
 	"wb-L0-task/internal/domain/services/order"
@@ -25,47 +27,39 @@ func New(logger *slog.Logger, consumer *kafka.Reader, service *order.KafkaConsum
 func (a *App) Run(ctx context.Context) {
 	a.logger.Info("Starting Kafka consumer...")
 	for {
-		select {
-		case <-ctx.Done():
-			a.logger.Info("Stopping Kafka consumer...")
-			if err := a.consumer.Close(); err != nil {
-				a.logger.Error("Failed to close consumer", "err", err)
+		if errors.Is(ctx.Err(), context.Canceled) {
+			return
+		}
+		msg, err := a.consumer.FetchMessage(ctx)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
 				return
 			}
-			a.logger.Info("Kafka consumer stopped successfully")
-			return
-		default:
-			a.logger.Info("Reading message...")
-			msg, err := a.consumer.FetchMessage(ctx)
-			if err != nil {
-				a.logger.Error("Error while reading message", "err", err)
-				continue
-			}
-			a.logger.Info("Message received",
-				"topic", msg.Topic,
-				"partition", msg.Partition,
-				"offset", msg.Offset,
-				"Key", string(msg.Key),
-				"Value", string(msg.Value),
-			)
-			if err = a.consumer.CommitMessages(ctx, msg); err != nil {
-				log.Fatal("failed to commit messages:", err)
-			}
-			a.logger.Info("Received message", "kafka msg", string(msg.Value))
-			err = a.service.SaveOrder(ctx, msg.Value)
-			if err != nil {
-				a.logger.Error("Failed to save order", "err", err)
-			}
+			a.logger.Error("Error while reading message", "err", err)
 			continue
 		}
+		a.logger.Info("Message received",
+			"topic", msg.Topic,
+			"partition", msg.Partition,
+			"offset", msg.Offset,
+			"Key", string(msg.Key),
+			"Value", string(msg.Value),
+		)
+		if err = a.consumer.CommitMessages(ctx, msg); err != nil {
+			log.Fatal("failed to commit messages:", err)
+		}
+		a.logger.Info("Received message", "kafka msg", string(msg.Value))
+		err = a.service.SaveOrder(ctx, msg.Value)
+		if err != nil {
+			a.logger.Error("Failed to save order", "err", err)
+		}
+		continue
 	}
 }
 
-func (a *App) Shutdown() error {
-	err := a.consumer.Close()
-	if err != nil {
-		a.logger.Error("Failed to close consumer", err)
-		return err
+func (a *App) Shutdown() {
+	a.logger.Info("Shutting down Kafka consumer")
+	if err := a.consumer.Close(); err != nil {
+		a.logger.Error("Failed to close consumer", "err", err)
 	}
-	return nil
 }

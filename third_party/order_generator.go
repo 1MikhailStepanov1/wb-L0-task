@@ -98,7 +98,6 @@ func main() {
 	}
 	time.Sleep(1 * time.Second)
 	//}
-
 }
 
 func generateDelivery() *Delivery {

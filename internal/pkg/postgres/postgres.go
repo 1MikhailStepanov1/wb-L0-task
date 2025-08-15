@@ -37,7 +37,3 @@ func SetupPostgres(ctx context.Context, c *Config) (*pgxpool.Pool, *manager.Mana
 	ctxGetter := trmpgx.DefaultCtxGetter
 	return pool, trManager, ctxGetter, nil
 }
-
-func Stop(p *pgxpool.Pool) {
-	p.Close()
-}

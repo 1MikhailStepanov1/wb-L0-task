@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 	"log/slog"
 	"net/http"
+	"time"
 	"wb-L0-task/internal/controllers/order"
 	"wb-L0-task/internal/pkg/config"
 	"wb-L0-task/internal/pkg/server"
@@ -50,7 +51,6 @@ func New(
 	}
 }
 
-// TODO Error handling
 func (a *App) Run() {
 	err := a.Start()
 	if err != nil {
@@ -66,10 +66,13 @@ func (a *App) Start() error {
 	return nil
 }
 
-// TODO Graceful shutdown
-func (a *App) Stop(ctx context.Context) error {
+func (a *App) Shutdown(shutdownTimeout time.Duration) {
 	a.logger.Info("Stopping HTTP server")
-	return a.server.Shutdown(ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+	if err := a.server.Shutdown(ctx); err != nil {
+		a.logger.Error("HTTP shutdown with error", "err", err)
+	}
 }
 
 func registerRoutes(router *chi.Mux, controller *order.Controller) {

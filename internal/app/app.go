@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"log/slog"
+	"time"
 	"wb-L0-task/internal/app/http"
 	"wb-L0-task/internal/app/kafka"
 	order_controller "wb-L0-task/internal/controllers/order"
@@ -12,6 +13,7 @@ import (
 	"wb-L0-task/internal/pkg/config"
 	kafka_pkg "wb-L0-task/internal/pkg/kafka"
 	"wb-L0-task/internal/pkg/postgres"
+	"wb-L0-task/internal/pkg/shutdown"
 	repo_pkg "wb-L0-task/internal/repositories/postgres"
 )
 
@@ -20,7 +22,6 @@ type App struct {
 	KafkaApp *kafka.App
 }
 
-// TODO Handling panic
 func New(
 	ctx context.Context,
 	c *config.AppConfig,
@@ -51,6 +52,15 @@ func New(
 
 	kafkaConsumerService := order_service.NewKafkaConsumerService(logger, orderRepo)
 	kafkaApp := kafka.New(logger, consumer, kafkaConsumerService)
+
+	shutdown.RegisterFn(func() {
+		logger.Info("Shutting down")
+		pool.Close()
+		httpApp.Shutdown(time.Duration(c.Server.ShutdownTimeout))
+		kafkaApp.Shutdown()
+		logger.Info("Shutdown completed")
+	})
+
 	return &App{
 		HTTPApp:  httpApp,
 		KafkaApp: kafkaApp,

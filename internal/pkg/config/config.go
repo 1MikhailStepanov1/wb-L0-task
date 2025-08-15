@@ -55,7 +55,10 @@ func initConfig(configFile string) (*AppConfig, error) {
 		return nil, fmt.Errorf("v.ReadInConfig: %w", err)
 	}
 
-	err = godotenv.Load() // TODO need to be handled
+	err = godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("godotenv.Load: %w", err)
+	}
 
 	for _, key := range viperInstance.AllKeys() {
 		value := viperInstance.GetString(key)

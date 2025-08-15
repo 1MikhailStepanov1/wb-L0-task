@@ -204,13 +204,17 @@ func (o *Order) Save(ctx context.Context, order *models.Order) error {
 			)
 		}
 		batchRes := tx.SendBatch(ctx, batch)
-		defer batchRes.Close()
 
 		for range order.Items {
 			_, err = batchRes.Exec()
 			if err != nil {
 				return fmt.Errorf("failed to insert order_items: %w", err)
 			}
+		}
+
+		err = batchRes.Close()
+		if err != nil {
+			return fmt.Errorf("failed to close batch: %w", err)
 		}
 		return nil
 	})
@@ -226,7 +230,7 @@ func (o *Order) GetOrders(ctx context.Context, limit int32) ([]models.Order, err
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 
 		rows, err := tx.Query(ctx, "SELECT * FROM orders ORDER BY orders.date_created LIMIT $1", limit)
-		defer rows.Close()
+		defer rows.Close() //nolint:staticcheck
 		if err != nil {
 			return fmt.Errorf("failed to get orders: %w", err)
 		}
@@ -249,22 +253,6 @@ func (o *Order) GetOrders(ctx context.Context, limit int32) ([]models.Order, err
 			if err != nil {
 				return fmt.Errorf("failed to scan order: %w", err)
 			}
-
-			//err = o.loadOrderDelivery(ctx, tx, &order)
-			//if err != nil {
-			//	return err
-			//}
-			//
-			//err = o.loadOrderPayment(ctx, tx, &order)
-			//if err != nil {
-			//	return err
-			//}
-			//
-			//err = o.loadOrderItems(ctx, tx, &order)
-			//if err != nil {
-			//	return err
-			//}
-
 			orders = append(orders, order)
 		}
 		return rows.Err()
@@ -336,7 +324,7 @@ func (o *Order) GetOrderItems(ctx context.Context, orderUID string) ([]models.It
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		rows, err := tx.Query(ctx, "SELECT * FROM order_items WHERE order_uid = $1", orderUID)
-		defer rows.Close()
+		defer rows.Close() //nolint:staticcheck
 		if err != nil {
 			return fmt.Errorf("failed to load order items: %w", err)
 		}
