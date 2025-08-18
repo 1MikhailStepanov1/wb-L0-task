@@ -7,6 +7,7 @@ import (
 	"github.com/segmentio/kafka-go"
 	"log"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -104,7 +105,7 @@ func generateDelivery() *Delivery {
 	return &Delivery{
 		Name:    generateRandomString(1, rand.Intn(100)),
 		Phone:   fmt.Sprintf("+%s", generateRandomString(2, rand.Intn(15))),
-		Zip:     string(rune(rand.Intn(100000000))),
+		Zip:     strconv.Itoa(rand.Intn(1000000)),
 		City:    generateRandomString(3, rand.Intn(30)),
 		Address: generateRandomString(3, rand.Intn(50)),
 		Region:  generateRandomString(3, rand.Intn(25)),

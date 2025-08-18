@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -35,34 +35,10 @@
         button:hover {
             background-color: #45a049;
         }
-        .order-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-        }
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .order-id {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .order-date {
-            color: #000000;
-        }
-        .order-details {
-            margin-top: 10px;
-        }
-        .detail-row {
-            display: flex;
-            margin-bottom: 5px;
-        }
-        .detail-label {
-            font-weight: bold;
-            width: 150px;
+        .order {
+            background: #fbfbfb;
+            border-radius: 1px;
+            border-color: #000000;
         }
         .loading {
             color: #7f8c8d;
@@ -96,147 +72,13 @@
     const orderElement = document.getElementById('order');
     const orderForm = document.getElementById('orderForm');
 
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
-
-    function createOrderCard(order) {
+    function createOrder(order) {
         return `
-                <div class="order-card">
-                    <div class="order-header">
-                        <span class="order-id">Order #${order.order_uid}</span>
-                        <span class="order-date">${formatDate(order.date_created)}</span>
-                    </div>
-                    <div class="order-details">
-                        <div class="detail-row">
-                            <span class="detail-label">Track Number:</span>
-                            <span>${order.track_number}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Entry:</span>
-                            <span>${order.entry}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Locale:</span>
-                            <span>${order.locale}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Internal signature:</span>
-                            <span>${order.internal_signature}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Customer Id:</span>
-                            <span>${order.customer_id}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Delivery Service:</span>
-                            <span>${order.delivery_service}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Shard Key:</span>
-                            <span>${order.shardkey}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">SM ID:</span>
-                            <span>${order.sm_id}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">OOF shard:</span>
-                            <span>${order.oof_shard}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-    }
-    function createDeliveryCard(delivery) {
-        return `
-            <div class="order-card">
-                <div class="order-header">
-                    <span class="order-id">Delivery Information</span>
-                </div>
-                <div class="order-details">
-                    <div class="detail-row">
-                        <span class="detail-label">Name:</span>
-                        <span>${delivery.name}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Phone:</span>
-                        <span>${delivery.phone}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">ZIP Code:</span>
-                        <span>${delivery.zip}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">City:</span>
-                        <span>${delivery.city}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Address:</span>
-                        <span>${delivery.address}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Region:</span>
-                        <span>${delivery.region}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Email:</span>
-                        <span>${delivery.email}</span>
-                    </div>
-                </div>
+            <div class="order">
+                <pre>${JSON.stringify(order, null, 4)}</pre>
             </div>
-        `;
+        `
     }
-
-    function createPaymentCard(payment) {
-        return `
-            <div class="order-card">
-                <div class="order-header">
-                    <span class="order-id">Payment Information</span>
-                </div>
-                <div class="order-details">
-                    <div class="detail-row">
-                        <span class="detail-label">Transaction ID:</span>
-                        <span>${payment.transaction}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Currency:</span>
-                        <span>${payment.currency}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Provider:</span>
-                        <span>${payment.provider}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Amount:</span>
-                        <span>${payment.amount}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Payment Date:</span>
-                        <span>${payment.payment_dt}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Bank:</span>
-                        <span>${payment.bank}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Delivery Cost:</span>
-                        <span>${payment.delivery_cost}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Goods Total:</span>
-                        <span>${payment.goods_total}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Custom Fee:</span>
-                        <span>${payment.custom_fee}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
     async function loadOrders(endpoint) {
         orderElement.innerHTML = '<div class="loading">Loading order...</div>';
 
@@ -254,9 +96,7 @@
             }
 
             orderElement.innerHTML = '';
-            orderElement.innerHTML += createOrderCard(order);
-            orderElement.innerHTML += createDeliveryCard(order.delivery);
-            orderElement.innerHTML += createPaymentCard(order.payment);
+            orderElement.innerHTML += createOrder(order);
 
         } catch (error) {
             orderElement.innerHTML = `<div class="error">Error: ${error.message}</div>`;
