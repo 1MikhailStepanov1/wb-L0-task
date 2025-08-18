@@ -14,6 +14,12 @@ const (
 	productionLogsMod = "PROD"
 )
 
+var globalLogger = newDefault()
+
+func newDefault() *slog.Logger {
+	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+}
+
 func New(cfg *Config) *slog.Logger {
 	var log *slog.Logger
 	switch cfg.LogMod {
@@ -24,6 +30,7 @@ func New(cfg *Config) *slog.Logger {
 	default:
 		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
+	globalLogger = log
 
 	return log
 }

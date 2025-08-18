@@ -20,14 +20,14 @@ func makeQuitSignal() chan os.Signal {
 func main() {
 	cfg, err := config.New()
 	if err != nil {
-		panic(err)
+
 	}
-	l := logger.New(cfg.Logger)
+	_ = logger.New(cfg.Logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	application := app.New(ctx, cfg, l)
+	application := app.New(ctx, cfg)
 
 	go func() {
 		application.HTTPApp.Run()

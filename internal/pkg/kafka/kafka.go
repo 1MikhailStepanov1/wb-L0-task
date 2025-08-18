@@ -15,7 +15,7 @@ type Config struct {
 	} `mapstructure:"consumer"`
 }
 
-func NewConsumer(config *Config) (*kafka.Reader, error) {
+func NewConsumer(config *Config) *kafka.Reader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        config.Brokers,
 		Topic:          config.Topics.Input,
@@ -24,5 +24,5 @@ func NewConsumer(config *Config) (*kafka.Reader, error) {
 		CommitInterval: 0, // Sync mod for native Commit() call
 	})
 
-	return reader, nil
+	return reader
 }

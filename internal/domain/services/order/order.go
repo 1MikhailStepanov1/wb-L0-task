@@ -2,25 +2,23 @@ package order
 
 import (
 	"context"
-	"log/slog"
 	"time"
 	serviceErrors "wb-L0-task/internal/domain/errors"
 	model "wb-L0-task/internal/domain/order"
 	"wb-L0-task/internal/pkg/cache"
+	"wb-L0-task/internal/pkg/logger"
 	"wb-L0-task/internal/repositories/postgres"
 )
 
 const initCacheSize = 10
 
 type Order struct {
-	logger  *slog.Logger
 	storage *postgres.Order
 	cache   *cache.Cache[model.Order]
 }
 
-func New(logger *slog.Logger, cache *cache.Cache[model.Order], storage *postgres.Order) *Order {
+func New(cache *cache.Cache[model.Order], storage *postgres.Order) *Order {
 	return &Order{
-		logger:  logger,
 		storage: storage,
 		cache:   cache,
 	}
@@ -47,26 +45,26 @@ func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order,
 }
 
 func (o *Order) InitCache(ctx context.Context) error {
-	o.logger.Info("Initializing orders cache", "cache_size", initCacheSize)
+	logger.Info("Initializing orders cache", "cache_size", initCacheSize)
 	orders, err := o.storage.GetOrders(ctx, initCacheSize)
 	for i := range orders {
 		delivery, err := o.storage.GetOrderDelivery(ctx, orders[i].UID)
 		if err != nil {
-			o.logger.Error("Failed to get order delivery", "order_uid", orders[i].UID, "error", err)
+			logger.Error("Failed to get order delivery", "order_uid", orders[i].UID, "error", err)
 			return err
 		}
 		orders[i].Delivery = *delivery
 
 		payment, err := o.storage.GetOrderPayment(ctx, orders[i].UID)
 		if err != nil {
-			o.logger.Error("Failed to get order payment", "order_uid", orders[i].UID, "error", err)
+			logger.Error("Failed to get order payment", "order_uid", orders[i].UID, "error", err)
 			return err
 		}
 		orders[i].Payment = *payment
 
 		items, err := o.storage.GetOrderItems(ctx, orders[i].UID)
 		if err != nil {
-			o.logger.Error("Failed to get order items", "order_uid", orders[i].UID, "error", err)
+			logger.Error("Failed to get order items", "order_uid", orders[i].UID, "error", err)
 			return err
 		}
 		orders[i].Items = items

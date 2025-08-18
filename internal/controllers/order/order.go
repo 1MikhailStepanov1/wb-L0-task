@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
-	"log/slog"
 	"net/http"
 	model "wb-L0-task/internal/domain/order"
+	"wb-L0-task/internal/pkg/logger"
 )
 
 type Service interface {
@@ -14,13 +14,11 @@ type Service interface {
 }
 
 type Controller struct {
-	logger  *slog.Logger
 	service Service
 }
 
-func New(logger *slog.Logger, service Service) *Controller {
+func New(service Service) *Controller {
 	return &Controller{
-		logger:  logger,
 		service: service,
 	}
 }
@@ -41,7 +39,7 @@ func (c *Controller) GetOrderById() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(order); err != nil {
-			c.logger.Error("Failed to encode response", "err", err)
+			logger.Error("Failed to encode response", "err", err)
 		}
 	}
 }
