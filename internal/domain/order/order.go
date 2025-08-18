@@ -52,7 +52,7 @@ type Item struct {
 	Price          uint   `json:"price" db:"price"`
 	RID            string `json:"rid" db:"rid"`
 	Name           string `json:"name" db:"name"`
-	Sale           int8   `json:"sale" db:"sale"`
+	Sale           uint   `json:"sale" db:"sale"`
 	Size           string `json:"size" db:"size"`
 	TotalPrice     uint   `json:"total_price" db:"total_price"`
 	NomenclatureID int64  `json:"nm_id" db:"nm_id"`

@@ -40,7 +40,11 @@ func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order,
 	}
 
 	// Get it from DB
-	if exists, err := o.storage.Exists(ctx, orderId); exists && err == nil { //TODO Update error handling from DB
+	exists, err := o.storage.Exists(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
 		res, err := o.storage.GetById(ctx, orderId)
 		if err != nil {
 			return nil, err
@@ -82,7 +86,7 @@ func (o *Order) InitCache(ctx context.Context) error {
 		return err
 	}
 	for _, order := range orders {
-		o.cache.Set(order.UID, order, 5*time.Minute) //TODO Remove magic number
+		o.cache.Set(order.UID, order, 30*time.Second)
 	}
 	return nil
 }

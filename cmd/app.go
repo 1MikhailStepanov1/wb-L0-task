@@ -20,7 +20,8 @@ func makeQuitSignal() chan os.Signal {
 func main() {
 	cfg, err := config.New()
 	if err != nil {
-
+		logger.Error("Could not initialize config", err)
+		os.Exit(1)
 	}
 	_ = logger.New(cfg.Logger)
 

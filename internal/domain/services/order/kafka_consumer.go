@@ -63,7 +63,7 @@ func (s *KafkaConsumerService) isValidOrder(order *models.Order) error {
 	// Check total sum of items with payment
 	goodsTotal := uint(0)
 	for _, item := range order.Items {
-		expectedTotal := item.Price * (100 - uint(item.Sale)) / 100
+		expectedTotal := item.Price * (100 - item.Sale) / 100
 		if expectedTotal == item.TotalPrice {
 			goodsTotal += item.TotalPrice
 		} else {

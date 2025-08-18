@@ -20,6 +20,11 @@ linters:
     - gocritic
     - gomodguard
     - whitespace
+  exclusions:
+    paths:
+      - third_party
+      - build
+      - containers-data
 
 run:
   timeout: 5m
