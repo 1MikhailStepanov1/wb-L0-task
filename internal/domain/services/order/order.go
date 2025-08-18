@@ -7,17 +7,26 @@ import (
 	model "wb-L0-task/internal/domain/order"
 	"wb-L0-task/internal/pkg/cache"
 	"wb-L0-task/internal/pkg/logger"
-	"wb-L0-task/internal/repositories/postgres"
 )
 
 const initCacheSize = 10
 
+type Repository interface {
+	GetById(ctx context.Context, orderUID string) (*model.Order, error)
+	Exists(ctx context.Context, orderUID string) (bool, error)
+	Save(ctx context.Context, order *model.Order) error
+	GetOrders(ctx context.Context, limit int32) ([]model.Order, error)
+	GetOrderDelivery(ctx context.Context, orderUID string) (*model.Delivery, error)
+	GetOrderPayment(ctx context.Context, orderUID string) (*model.Payment, error)
+	GetOrderItems(ctx context.Context, orderUID string) ([]model.Item, error)
+}
+
 type Order struct {
-	storage *postgres.Order
+	storage Repository
 	cache   *cache.Cache[model.Order]
 }
 
-func New(cache *cache.Cache[model.Order], storage *postgres.Order) *Order {
+func New(cache *cache.Cache[model.Order], storage Repository) *Order {
 	return &Order{
 		storage: storage,
 		cache:   cache,

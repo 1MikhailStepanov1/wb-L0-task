@@ -4,23 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
+	serviceErrors "wb-L0-task/internal/domain/errors"
 	models "wb-L0-task/internal/domain/order"
 	"wb-L0-task/internal/pkg/logger"
-	repo_pkg "wb-L0-task/internal/repositories/postgres"
 )
 
-type Repository interface {
-	SaveOrder(ctx context.Context, order *Order) error
-	SaveDelivery(ctx context.Context, delivery models.Delivery) error
-	SavePayment(ctx context.Context, payment *models.Payment) error
-	SaveItems(ctx context.Context, items []models.Item) error
-}
+const phoneNumberRegex = `^(\+?\d{1,3})?\d{7,15}$`
+const emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
 type KafkaConsumerService struct {
-	storage *repo_pkg.Order
+	storage Repository
 }
 
-func NewKafkaConsumerService(storage *repo_pkg.Order) *KafkaConsumerService {
+func NewKafkaConsumerService(storage Repository) *KafkaConsumerService {
 	return &KafkaConsumerService{
 		storage: storage,
 	}
@@ -34,8 +31,9 @@ func (s *KafkaConsumerService) SaveOrder(ctx context.Context, message []byte) er
 		return fmt.Errorf("invalid order format")
 	}
 
-	if order.UID == "" {
-		return fmt.Errorf("order UID is required")
+	err = s.isValidOrder(order)
+	if err != nil {
+		return err
 	}
 
 	err = s.storage.Save(ctx, order)
@@ -43,5 +41,41 @@ func (s *KafkaConsumerService) SaveOrder(ctx context.Context, message []byte) er
 		logger.Error("Failed to save order", "error", err)
 		return fmt.Errorf("save order failed")
 	}
+	return nil
+}
+
+func (s *KafkaConsumerService) isValidOrder(order *models.Order) error {
+	if order.UID == "" {
+		return serviceErrors.ErrInvalidEntity.ForEntity("order_uid")
+	}
+
+	// Check correct phone number
+	matched, err := regexp.MatchString(phoneNumberRegex, order.Delivery.Phone)
+	if err != nil || !matched {
+		return serviceErrors.ErrInvalidEntity.ForEntity("order.delivery.phone")
+	}
+
+	// Check correct email
+	matched, err = regexp.MatchString(emailRegex, order.Delivery.Email)
+	if err != nil || !matched {
+		return serviceErrors.ErrInvalidEntity.ForEntity("order.delivery.email")
+	}
+	// Check total sum of items with payment
+	goodsTotal := uint(0)
+	for _, item := range order.Items {
+		expectedTotal := item.Price * (100 - uint(item.Sale)) / 100
+		if expectedTotal == item.TotalPrice {
+			goodsTotal += item.TotalPrice
+		} else {
+			return serviceErrors.ErrInvalidEntity.ForEntity("order.item.total_price")
+		}
+	}
+	if order.Payment.GoodsTotal != goodsTotal {
+		return serviceErrors.ErrInvalidEntity.ForEntity("order.payment.goods_total")
+	}
+	if order.Payment.DeliveryCost+goodsTotal != order.Payment.Amount {
+		return serviceErrors.ErrInvalidEntity.ForEntity("order.payment.goods_total")
+	}
+
 	return nil
 }

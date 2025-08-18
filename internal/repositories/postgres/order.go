@@ -7,7 +7,7 @@ import (
 	trmpgx "github.com/avito-tech/go-transaction-manager/pgxv5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	models "wb-L0-task/internal/domain/order"
+	model "wb-L0-task/internal/domain/order"
 )
 
 type Order struct {
@@ -20,8 +20,8 @@ func NewOrder(db *pgxpool.Pool, trManager TrManager, c *trmpgx.CtxGetter) *Order
 	}
 }
 
-func (o *Order) GetById(ctx context.Context, orderUID string) (*models.Order, error) {
-	var result models.Order
+func (o *Order) GetById(ctx context.Context, orderUID string) (*model.Order, error) {
+	var result model.Order
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		err := tx.QueryRow(ctx, "SELECT * FROM orders WHERE uid = $1", orderUID).Scan(
@@ -80,7 +80,7 @@ func (o *Order) GetById(ctx context.Context, orderUID string) (*models.Order, er
 		}
 		defer rows.Close()
 		for rows.Next() {
-			var item models.Item
+			var item model.Item
 			err = rows.Scan(
 				&item.ID,
 				&item.OrderUID,
@@ -125,7 +125,7 @@ func (o *Order) Exists(ctx context.Context, orderUID string) (bool, error) {
 	return true, nil
 }
 
-func (o *Order) Save(ctx context.Context, order *models.Order) error {
+func (o *Order) Save(ctx context.Context, order *model.Order) error {
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		_, err := tx.Exec(ctx,
@@ -224,8 +224,8 @@ func (o *Order) Save(ctx context.Context, order *models.Order) error {
 	return nil
 }
 
-func (o *Order) GetOrders(ctx context.Context, limit int32) ([]models.Order, error) {
-	orders := make([]models.Order, 0, limit)
+func (o *Order) GetOrders(ctx context.Context, limit int32) ([]model.Order, error) {
+	orders := make([]model.Order, 0, limit)
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 
@@ -236,7 +236,7 @@ func (o *Order) GetOrders(ctx context.Context, limit int32) ([]models.Order, err
 		}
 
 		for rows.Next() {
-			var order models.Order
+			var order model.Order
 			err = rows.Scan(
 				&order.UID,
 				&order.TrackNumber,
@@ -264,8 +264,8 @@ func (o *Order) GetOrders(ctx context.Context, limit int32) ([]models.Order, err
 	return orders, nil
 }
 
-func (o *Order) GetOrderDelivery(ctx context.Context, orderUID string) (*models.Delivery, error) {
-	var delivery models.Delivery
+func (o *Order) GetOrderDelivery(ctx context.Context, orderUID string) (*model.Delivery, error) {
+	var delivery model.Delivery
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		err := tx.QueryRow(ctx, "SELECT * FROM deliveries WHERE order_uid = $1", orderUID).Scan(
@@ -290,8 +290,8 @@ func (o *Order) GetOrderDelivery(ctx context.Context, orderUID string) (*models.
 	return &delivery, nil
 }
 
-func (o *Order) GetOrderPayment(ctx context.Context, orderUID string) (*models.Payment, error) {
-	var payment models.Payment
+func (o *Order) GetOrderPayment(ctx context.Context, orderUID string) (*model.Payment, error) {
+	var payment model.Payment
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		err := tx.QueryRow(ctx, "SELECT * FROM payments WHERE order_uid = $1", orderUID).Scan(
@@ -319,8 +319,8 @@ func (o *Order) GetOrderPayment(ctx context.Context, orderUID string) (*models.P
 	return &payment, nil
 }
 
-func (o *Order) GetOrderItems(ctx context.Context, orderUID string) ([]models.Item, error) {
-	var items []models.Item
+func (o *Order) GetOrderItems(ctx context.Context, orderUID string) ([]model.Item, error) {
+	var items []model.Item
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		rows, err := tx.Query(ctx, "SELECT * FROM order_items WHERE order_uid = $1", orderUID)
@@ -330,7 +330,7 @@ func (o *Order) GetOrderItems(ctx context.Context, orderUID string) ([]models.It
 		}
 
 		for rows.Next() {
-			var item models.Item
+			var item model.Item
 			err = rows.Scan(
 				&item.ID,
 				&item.OrderUID,

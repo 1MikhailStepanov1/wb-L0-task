@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrNotFound = NewHTTPError(404, "{entity} not found")
+	ErrNotFound      = NewHTTPError(404, "{entity} not found")
+	ErrInvalidEntity = NewHTTPError(400, "Failed to pass validation field: {entity}")
 )
 
 type HTTPError struct {

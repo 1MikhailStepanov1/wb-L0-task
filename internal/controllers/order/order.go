@@ -3,8 +3,10 @@ package order
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	serviceErrors "wb-L0-task/internal/domain/errors"
 	model "wb-L0-task/internal/domain/order"
 	"wb-L0-task/internal/pkg/logger"
 )
@@ -33,8 +35,11 @@ func (c *Controller) GetOrderById() http.HandlerFunc {
 
 		order, err := c.service.GetOrderById(r.Context(), orderUID)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
+			if errors.Is(err, serviceErrors.ErrNotFound) {
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			}
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
