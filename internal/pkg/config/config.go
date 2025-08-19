@@ -57,7 +57,7 @@ func initConfig(configFile string) (*AppConfig, error) {
 
 	err = godotenv.Load()
 	if err != nil {
-		return nil, fmt.Errorf("godotenv.Load: %w", err)
+		logger.Debug("Can`t load environment variables from file", "err", err)
 	}
 
 	for _, key := range viperInstance.AllKeys() {

@@ -59,7 +59,7 @@
             <label for="order_uid">Order ID:</label>
             <input type="text" id="order_uid" name="order_uid" placeholder="Enter order UID">
         </div>
-        <button type="submit">Search</button>
+        <button type="button" id="searchButton">Search</button>
     </form>
 </div>
 
@@ -68,9 +68,10 @@
 </div>
 
 <script>
-    const API_BASE_URL = 'http://localhost:8080';
+    const appPort = window.location.port || '8080';
+    const API_BASE_URL = 'http://localhost:' + appPort;
     const orderElement = document.getElementById('order');
-    const orderForm = document.getElementById('orderForm');
+    const searchButton = document.getElementById('searchButton');
 
     function createOrder(order) {
         return `
@@ -104,7 +105,7 @@
         }
     }
 
-    orderForm.addEventListener('submit', async (e) => {
+    searchButton.addEventListener('click', async (e) => {
         e.preventDefault();
         const orderUid = document.getElementById('order_uid').value.trim();
         if (orderUid) {

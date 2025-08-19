@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"net/http"
+	"os"
 	"time"
 	"wb-L0-task/internal/controllers/order"
 	"wb-L0-task/internal/pkg/config"
@@ -37,6 +38,7 @@ func New(
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./web"))))
 	registerRoutes(r, controller)
 
 	s := server.New(config.Server)
@@ -52,6 +54,7 @@ func (a *App) Run() {
 	err := a.Start()
 	if err != nil {
 		logger.Error("Failed to start server", "err", err)
+		os.Exit(1)
 	}
 }
 
