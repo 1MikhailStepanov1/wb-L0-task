@@ -4,16 +4,17 @@ package order
 import (
 	"context"
 	"encoding/json"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	serviceErrors "wb-L0-task/internal/domain/errors"
 	model "wb-L0-task/internal/domain/order"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetOrderById_Success(t *testing.T) {

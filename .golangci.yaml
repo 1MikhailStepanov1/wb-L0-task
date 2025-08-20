@@ -1,25 +1,96 @@
 version: "2"
 
 linters:
+  default: none
   enable:
-    - errcheck
-    - goconst
-    - gocyclo
-    - gosec
-    - govet
-    - ineffassign
-    - lll
-    - misspell
-    - nakedret
-    - prealloc
-    - staticcheck
-    - unconvert
-    - unparam
-    - unused
-    - bodyclose
-    - gocritic
-    - gomodguard
-    - whitespace
+    - asasalint # checks for pass []any as any in variadic func(...any)
+    - bidichk # checks for dangerous unicode character sequences
+    - bodyclose # checks whether HTTP response body is closed successfully
+    - canonicalheader # checking the canonicality of the http header
+    - containedctx # detects struct contained context.Context field
+    - contextcheck # [too many false positives] checks the function whether use a non-inherited context
+    - cyclop # checks function and package cyclomatic complexity
+    - decorder # declaration order and number linter
+    - dogsled # find assignments/declarations with too many blank identifiers
+    - dupl # tool for code clone detection
+    - dupword # checks for duplicate words in the source code (usually miswritten)
+    - durationcheck # checks for two durations multiplied together
+    - err113 # check the errors handling expressions
+    - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
+    - errchkjson # checks types that are json encoded - reports unsupported types and unnecessary error checks
+    - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
+    - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
+    - exhaustive # checks exhaustiveness of enum switch statements
+    - fatcontext # detects nested contexts in loops
+    - forbidigo # forbids identifiers
+    - forcetypeassert # finds type assertions which did forcely
+    - gocheckcompilerdirectives # check that go directories (//go: comments) are good.
+    - gochecknoglobals # checks that no global variables exist
+    - gochecknoinits # checks that no init functions are present in Go code
+    - gochecksumtype # exhaustiveness checks on Go "sum types."
+    - gocognit # computes and checks the cognitive complexity of functions
+    - goconst # finds repeated strings that could be replaced by a constant
+    - gocritic # provides diagnostics that check for bugs, performance and style issues
+    - gocyclo # computes and checks the cyclomatic complexity of functions
+    - godox # extract speficic comments from Go code based on keywords
+    - gomoddirectives # handle `replace`, `retract`, `exclude` directives into `go.mod`
+    - gomodguard # allow and block lists linter for direct Go module dependencies. This is different from depguard where there are different block types for example.go version constraints and module recommendations
+    - goprintffuncname # checks that printf-like functions are named with `f` at the end
+    - gosec # inspects source code for security problems
+    - gosmopolitan # report certain i18n/l10n anti-patterns
+    - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    - grouper # linter to analyze expression groups
+    - inamedparam # reports interfaces with unnamed method parameters
+    - ineffassign # detects when assignments to existing variables are not used
+    - interfacebloat # checks the number of methods inside an interface
+    - intrange # checking for loops that could use the Go 1.22 integer range feature
+    - ireturn # Accept Interfaces, Return Concrete Types
+    - lll # reports long lines
+    - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
+    - maintidx # maintidx measures the maintainability index of each function
+    - makezero # finds slice declarations with non-zero initial length
+    - mirror # use right mirror functions for string/[]byte performance bust
+    - musttag # enforce field tags in (un)marshaled structs
+    - nakedret # finds naked returns in functions greater than a specified function length
+    - nestif # reports deeply nested if statements
+    - nilerr # finds the code that returns nil even if it checks that the error is not nil
+    - nilnil # checks that there is no simultaneous return of nil error and an invalid value
+    - noctx # finds sending http request without context.Context
+    - nolintlint # reports ill-formed or insufficient nolint directives
+    - paralleltest # check if your tests have been marked as parallel correctly
+    - perfsprint # linter for performance, aiming at usages of fmt.Sprintf which have faster alternatives
+    - prealloc # find slice declarations that could potentially be preallocated
+    - predeclared # finds code that shadows one of Go's predeclared identifiers
+    - promlinter # checks Prometheus metrics naming via promlint
+    - protogetter # protobuf - use getters instead of fields
+    - reassign # checks that package variables are not reassigned
+    - rowserrcheck # checks whether err of sql.Rows is checked
+    - sloglint # ensure consistent code style when using log/slog
+    - spancheck # checks usage of OpenTelemetry/Census spans
+    - sqlclosecheck # confirms DB rows and statements are closed properly
+    - staticcheck # is a go vet on steroids, applying a ton of static analysis checks
+    - testableexamples # checks if examples are testable (have an expected output)
+    - testifylint # checks usage of github.com/stretchr/testify
+    - testpackage # encourages you to use a separate _test package
+    - thelper # detects golang test helpers without t.Helper() call
+    - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
+    - unconvert # removes unnecessary type conversions
+    - unparam # reports unused function parameters
+    - unused # checks for unused constants, variables, functions and types
+    - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
+    - wastedassign # finds wasted assignment statements
+    - whitespace # detects leading and trailing whitespace
+  exclusions:
+    paths:
+      - third_party
+      - build
+      - containers-data
+
+formatters:
+  enable:
+    - gofmt
+    - golines
+    - swaggo
   exclusions:
     paths:
       - third_party

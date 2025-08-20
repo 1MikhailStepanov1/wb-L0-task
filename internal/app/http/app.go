@@ -4,16 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"log"
 	"net/http"
-	"os"
 	"time"
+
 	"wb-L0-task/internal/controllers/order"
 	"wb-L0-task/internal/pkg/config"
 	"wb-L0-task/internal/pkg/logger"
 	"wb-L0-task/internal/pkg/server"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 type App struct {
@@ -53,15 +55,14 @@ func New(
 func (a *App) Run() {
 	err := a.Start()
 	if err != nil {
-		logger.Error("Failed to start server", "err", err)
-		os.Exit(1)
+		log.Fatal("Failed to start server: n", err)
 	}
 }
 
 func (a *App) Start() error {
 	logger.Info("HTTP Server started")
 	if err := a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		return fmt.Errorf("HTTP server error: %v", err)
+		return fmt.Errorf("HTTP server error: %w", err)
 	}
 	return nil
 }

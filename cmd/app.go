@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
 	"wb-L0-task/internal/app"
 	"wb-L0-task/internal/pkg/config"
 	"wb-L0-task/internal/pkg/logger"
@@ -20,8 +22,7 @@ func makeQuitSignal() chan os.Signal {
 func main() {
 	cfg, err := config.New()
 	if err != nil {
-		logger.Error("Could not initialize config", err)
-		os.Exit(1)
+		log.Fatal("Could not initialize config", err)
 	}
 	_ = logger.New(cfg.Logger)
 

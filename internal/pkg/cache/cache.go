@@ -39,7 +39,7 @@ func NewCache[T any](config *Config) *Cache[T] {
 }
 
 // Set Add element to cache.
-// If expiration == 0 default expiration time will be used
+// If expiration == 0 default expiration time will be used.
 func (c *Cache[T]) Set(k string, v T, expiration time.Duration) {
 	if expiration == 0 {
 		expiration = c.defaultExpiration
@@ -54,9 +54,10 @@ func (c *Cache[T]) Set(k string, v T, expiration time.Duration) {
 	}
 }
 
-func (c *Cache[T]) Get(k string) (T, bool) {
+func (c *Cache[T]) Get(k string) (T, bool) { //nolint:ireturn
 	c.RLock()
 	defer c.RUnlock()
+
 	var zeroValue T
 	item, ok := c.items[k]
 	if !ok {
@@ -95,7 +96,6 @@ func (c *Cache[T]) expiredKeys() (keys []string) {
 			keys = append(keys, k)
 		}
 	}
-
 	return
 }
 

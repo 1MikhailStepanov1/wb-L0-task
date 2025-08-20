@@ -3,11 +3,13 @@ package kafka
 import (
 	"context"
 	"errors"
-	"github.com/segmentio/kafka-go"
 	"io"
 	"log"
+
 	"wb-L0-task/internal/domain/services/order"
 	"wb-L0-task/internal/pkg/logger"
+
+	"github.com/segmentio/kafka-go"
 )
 
 type App struct {

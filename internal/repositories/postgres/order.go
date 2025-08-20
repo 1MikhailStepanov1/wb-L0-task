@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	model "wb-L0-task/internal/domain/order"
+
 	trmpgx "github.com/avito-tech/go-transaction-manager/pgxv5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	model "wb-L0-task/internal/domain/order"
 )
 
 type Order struct {
@@ -79,6 +81,7 @@ func (o *Order) GetById(ctx context.Context, orderUID string) (*model.Order, err
 			return fmt.Errorf("failed to get order items: %w", err)
 		}
 		defer rows.Close()
+
 		for rows.Next() {
 			var item model.Item
 			err = rows.Scan(
@@ -103,7 +106,6 @@ func (o *Order) GetById(ctx context.Context, orderUID string) (*model.Order, err
 		}
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +130,8 @@ func (o *Order) Exists(ctx context.Context, orderUID string) (bool, error) {
 func (o *Order) Save(ctx context.Context, order *model.Order) error {
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
-		_, err := tx.Exec(ctx,
+		_, err := tx.Exec(
+			ctx,
 			`INSERT INTO orders(uid, track_number, entry, locale, internal_signature, customer_id, delivery_service, 
                    shardkey, sm_id, oof_shard, date_created) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 			order.UID,
@@ -163,7 +166,8 @@ func (o *Order) Save(ctx context.Context, order *model.Order) error {
 			return fmt.Errorf("failed to insert delivery order: %w", err)
 		}
 
-		_, err = tx.Exec(ctx,
+		_, err = tx.Exec(
+			ctx,
 			`INSERT INTO payments(id, order_uid, transaction, request_id, currency, provider, amount, payment_dt, 
                      bank, delivery_cost, goods_total, custom_fee) 
 					VALUES(gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
@@ -228,8 +232,11 @@ func (o *Order) GetOrders(ctx context.Context, limit int32) ([]model.Order, erro
 	orders := make([]model.Order, 0, limit)
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
-
-		rows, err := tx.Query(ctx, "SELECT * FROM orders ORDER BY orders.date_created LIMIT $1", limit)
+		rows, err := tx.Query(
+			ctx,
+			"SELECT * FROM orders ORDER BY orders.date_created LIMIT $1",
+			limit,
+		)
 		defer rows.Close() //nolint:staticcheck
 		if err != nil {
 			return fmt.Errorf("failed to get orders: %w", err)
@@ -257,7 +264,6 @@ func (o *Order) GetOrders(ctx context.Context, limit int32) ([]model.Order, erro
 		}
 		return rows.Err()
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -324,6 +330,7 @@ func (o *Order) GetOrderItems(ctx context.Context, orderUID string) ([]model.Ite
 	err := o.trManager.Do(ctx, func(ctx context.Context) error {
 		tx := o.getter.DefaultTrOrDB(ctx, o.db)
 		rows, err := tx.Query(ctx, "SELECT * FROM order_items WHERE order_uid = $1", orderUID)
+
 		defer rows.Close() //nolint:staticcheck
 		if err != nil {
 			return fmt.Errorf("failed to load order items: %w", err)

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"time"
+
 	"wb-L0-task/internal/app/http"
 	"wb-L0-task/internal/app/kafka"
 	order_controller "wb-L0-task/internal/controllers/order"
@@ -24,16 +25,16 @@ type App struct {
 
 func New(
 	ctx context.Context,
-	c *config.AppConfig,
+	cfg *config.AppConfig,
 ) *App {
-	pool, trManager, ctxGetter, err := postgres.SetupPostgres(ctx, c.Postgres)
+	pool, trManager, ctxGetter, err := postgres.SetupPostgres(ctx, cfg.Postgres)
 	if err != nil {
 		logger.Error("failed to setup postgres", "err", err)
 	}
 
 	orderRepo := repo_pkg.NewOrder(pool, trManager, ctxGetter)
 
-	ordersCache := cache.NewCache[order.Order](c.Cache)
+	ordersCache := cache.NewCache[order.Order](cfg.Cache)
 	orderService := order_service.New(ordersCache, orderRepo)
 	err = orderService.InitCache(ctx)
 	if err != nil {
@@ -42,17 +43,18 @@ func New(
 
 	orderController := order_controller.New(orderService)
 
-	consumer := kafka_pkg.NewConsumer(c.Kafka)
+	consumer := kafka_pkg.NewConsumer(cfg.Kafka)
 
-	httpApp := http.New(c, orderController)
+	httpApp := http.New(cfg, orderController)
 
 	kafkaConsumerService := order_service.NewKafkaConsumerService(orderRepo)
 	kafkaApp := kafka.New(consumer, kafkaConsumerService)
 
+	//nolint:contextcheck
 	shutdown.RegisterFn(func() {
 		logger.Info("Shutting down")
 		pool.Close()
-		httpApp.Shutdown(time.Duration(c.Server.ShutdownTimeout))
+		httpApp.Shutdown(time.Duration(cfg.Server.ShutdownTimeout))
 		kafkaApp.Shutdown()
 		logger.Info("Shutdown completed")
 	})

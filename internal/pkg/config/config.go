@@ -3,16 +3,18 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 	"strings"
+
 	"wb-L0-task/internal/pkg/cache"
 	"wb-L0-task/internal/pkg/kafka"
 	"wb-L0-task/internal/pkg/logger"
 	"wb-L0-task/internal/pkg/postgres"
 	"wb-L0-task/internal/pkg/server"
+
+	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 const defaultConfigFileName = "config.yaml"

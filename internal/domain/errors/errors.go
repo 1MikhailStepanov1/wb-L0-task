@@ -6,29 +6,30 @@ import (
 )
 
 var (
-	ErrNotFound      = NewErrorForEntity(404, "{entity} not found")
-	ErrInvalidEntity = NewErrorForEntity(400, "Failed to pass validation field: {entity}")
+	ErrNotFound      = NewEntityError(404, "{entity} not found")
+	ErrInvalidEntity = NewEntityError(400, "Failed to pass validation field: {entity}")
+	ErrBrokenEntity  = NewEntityError(400, "Invalid entity received: {entity}")
 )
 
-type ErrorForEntity struct {
+type EntityError struct {
 	Code     int32
 	Template string
 	entity   string
 }
 
-func NewErrorForEntity(code int32, template string) *ErrorForEntity {
-	return &ErrorForEntity{Code: code, Template: template}
+func NewEntityError(code int32, template string) *EntityError {
+	return &EntityError{Code: code, Template: template}
 }
 
-func (e *ErrorForEntity) ForEntity(entity string) *ErrorForEntity {
-	return &ErrorForEntity{
+func (e *EntityError) ForEntity(entity string) *EntityError {
+	return &EntityError{
 		Code:     e.Code,
 		Template: e.Template,
 		entity:   strings.ToLower(entity),
 	}
 }
 
-func (e *ErrorForEntity) Error() string {
+func (e *EntityError) Error() string {
 	msg := e.Template
 	if e.entity != "" {
 		msg = strings.ReplaceAll(msg, "{entity}", e.entity)
@@ -36,8 +37,8 @@ func (e *ErrorForEntity) Error() string {
 	return msg
 }
 
-func (e *ErrorForEntity) Is(target error) bool {
-	var t *ErrorForEntity
+func (e *EntityError) Is(target error) bool {
+	var t *EntityError
 	ok := errors.As(target, &t)
 	if !ok {
 		return false

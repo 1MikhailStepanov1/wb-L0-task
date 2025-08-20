@@ -3,15 +3,17 @@ package order
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"regexp"
+
 	serviceErrors "wb-L0-task/internal/domain/errors"
 	models "wb-L0-task/internal/domain/order"
 	"wb-L0-task/internal/pkg/logger"
 )
 
-const phoneNumberRegex = `^(\+?\d{1,3})?\d{7,15}$`
-const emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+const (
+	phoneNumberRegex = `^(\+?\d{1,3})?\d{7,15}$`
+	emailRegex       = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+)
 
 type KafkaConsumerService struct {
 	storage Repository
@@ -28,7 +30,7 @@ func (s *KafkaConsumerService) SaveOrder(ctx context.Context, message []byte) er
 	var err error
 	if err = json.Unmarshal(message, &order); err != nil {
 		logger.Error("Failed to unmarshal order", "error", err)
-		return fmt.Errorf("invalid order format")
+		return serviceErrors.ErrBrokenEntity.ForEntity("order")
 	}
 
 	err = s.isValidOrder(order)
@@ -39,7 +41,7 @@ func (s *KafkaConsumerService) SaveOrder(ctx context.Context, message []byte) er
 	err = s.storage.Save(ctx, order)
 	if err != nil {
 		logger.Error("Failed to save order", "error", err)
-		return fmt.Errorf("save order failed")
+		return err
 	}
 	return nil
 }

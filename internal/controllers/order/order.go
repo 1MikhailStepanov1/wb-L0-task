@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
 	serviceErrors "wb-L0-task/internal/domain/errors"
 	model "wb-L0-task/internal/domain/order"
 	"wb-L0-task/internal/pkg/logger"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Service interface {
