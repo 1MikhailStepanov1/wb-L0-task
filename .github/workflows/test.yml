@@ -1,0 +1,20 @@
+name: test.yml
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Test
+        run: go test ./...

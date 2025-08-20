@@ -1,0 +1,28 @@
+all: false
+dir: '{{.InterfaceDir}}'
+force-file-write: true
+formatter: goimports
+include-auto-generated: false
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  wb-L0-task/internal/domain/services/order:
+    interfaces:
+      Repository:
+        config:
+          filename: "mock_repository.go"
+      Cache:
+        config:
+          filename: "mock_cache.go"
+
+  wb-L0-task/internal/controllers/order:
+    interfaces:
+      Service:
+        config:
+          filename: "mock_service.go"
+

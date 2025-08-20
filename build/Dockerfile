@@ -8,8 +8,6 @@ COPY ../internal ./internal
 
 RUN go mod download
 
-RUN go get -u github.com/confluentinc/confluent-kafka-go/v2
-
 RUN GOOS=linux go build -o wb-lo-task ./cmd
 
 FROM alpine:3.21

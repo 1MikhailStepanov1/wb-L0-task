@@ -3,9 +3,9 @@ package order
 import (
 	"context"
 	"time"
+
 	serviceErrors "wb-L0-task/internal/domain/errors"
 	model "wb-L0-task/internal/domain/order"
-	"wb-L0-task/internal/pkg/cache"
 	"wb-L0-task/internal/pkg/logger"
 )
 
@@ -21,12 +21,17 @@ type Repository interface {
 	GetOrderItems(ctx context.Context, orderUID string) ([]model.Item, error)
 }
 
-type Order struct {
-	storage Repository
-	cache   *cache.Cache[model.Order]
+type Cache[T any] interface {
+	Set(k string, v T, expiration time.Duration)
+	Get(k string) (T, bool)
 }
 
-func New(cache *cache.Cache[model.Order], storage Repository) *Order {
+type Order struct {
+	storage Repository
+	cache   Cache[model.Order]
+}
+
+func New(cache Cache[model.Order], storage Repository) *Order {
 	return &Order{
 		storage: storage,
 		cache:   cache,

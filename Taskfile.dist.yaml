@@ -18,9 +18,17 @@ tasks:
   lint:
     desc: "Activate linters"
     cmds:
+      - golangci-lint cache clean
       - golangci-lint run ./...
 
   tidy:
     desc: "Cleaning go mod"
     cmds:
       - go mod tidy
+
+  unit:
+    desc: "Run unit tests with coverage"
+    cmds:
+      - go test -race --tags=unit -coverprofile={{.TASKFILE_DIR}}/coverage.out ./...
+      - go tool cover -html={{.TASKFILE_DIR}}/coverage.out
+      - rm -rf {{.TASKFILE_DIR}}/coverage.out
