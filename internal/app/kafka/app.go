@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"log"
-
 	"wb-L0-task/internal/domain/services/order"
 	"wb-L0-task/internal/pkg/logger"
 
@@ -45,13 +44,13 @@ func (a *App) Run(ctx context.Context) {
 			"Key", string(msg.Key),
 			"Value", string(msg.Value),
 		)
-		if err = a.consumer.CommitMessages(ctx, msg); err != nil {
-			log.Fatal("failed to commit messages:", err)
-		}
 		logger.Info("Received message", "kafka msg", string(msg.Value))
 		err = a.service.SaveOrder(ctx, msg.Value)
 		if err != nil {
 			logger.Error("Failed to save order", "err", err)
+		}
+		if err = a.consumer.CommitMessages(ctx, msg); err != nil {
+			log.Fatal("failed to commit messages:", err)
 		}
 		continue
 	}

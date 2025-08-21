@@ -75,7 +75,7 @@ func (s *KafkaConsumerService) isValidOrder(order *models.Order) error {
 	if order.Payment.GoodsTotal != goodsTotal {
 		return serviceErrors.ErrInvalidEntity.ForEntity("order.payment.goods_total")
 	}
-	if order.Payment.DeliveryCost+goodsTotal != order.Payment.Amount {
+	if order.Payment.DeliveryCost+goodsTotal+order.Payment.CustomFee != order.Payment.Amount {
 		return serviceErrors.ErrInvalidEntity.ForEntity("order.payment.goods_total")
 	}
 

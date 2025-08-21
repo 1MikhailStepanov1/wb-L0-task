@@ -1,4 +1,3 @@
-// internal/domain/order/controller_test.go
 package order
 
 import (
