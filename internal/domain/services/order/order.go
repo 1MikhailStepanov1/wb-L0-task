@@ -41,10 +41,12 @@ func New(cache Cache[model.Order], storage Repository) *Order {
 func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order, error) {
 	// Cache search
 	if order, exists := o.cache.Get(orderId); exists {
+		logger.Debug("Cache hit, give order from cache", "order_id", orderId)
 		return &order, nil
 	}
 
 	// Get it from DB
+	logger.Debug("Cache miss, give order from DB", "order_id", orderId)
 	exists, err := o.storage.Exists(ctx, orderId)
 	if err != nil {
 		return nil, err
@@ -55,6 +57,7 @@ func (o *Order) GetOrderById(ctx context.Context, orderId string) (*model.Order,
 			return nil, err
 		}
 		// Saving order in cache
+		logger.Debug("Save order in cache", "order_id", orderId)
 		o.cache.Set(orderId, *res, 0)
 		return res, nil
 	} else {

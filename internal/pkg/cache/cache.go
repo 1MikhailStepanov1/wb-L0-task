@@ -8,7 +8,7 @@ import (
 const defaultCleanupInterval = 1 * time.Minute
 
 type Config struct {
-	defaultExpirationTime int16 `mapstructure:"default_exp_time"`
+	DefaultExpirationTime int16 `mapstructure:"default_exp_time"`
 }
 
 type Item[T any] struct {
@@ -29,7 +29,7 @@ func NewCache[T any](config *Config) *Cache[T] {
 
 	cache := &Cache[T]{
 		items:             items,
-		defaultExpiration: time.Duration(config.defaultExpirationTime) * time.Second,
+		defaultExpiration: time.Duration(config.DefaultExpirationTime) * time.Second,
 		cleanupInterval:   defaultCleanupInterval,
 	}
 
