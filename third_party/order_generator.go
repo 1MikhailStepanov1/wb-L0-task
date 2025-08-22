@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/segmentio/kafka-go"
 	"log"
 	"math/rand"
+	"net"
 	"strconv"
 	"time"
 )
@@ -95,6 +97,11 @@ func main() {
 			Value: orderJson,
 		})
 		if err != nil {
+			var netErr net.Error
+			if errors.As(err, &netErr) && netErr.Timeout() {
+				log.Printf("Work deadline exceeded")
+				return
+			}
 			log.Fatal(err)
 		}
 		time.Sleep(100 * time.Millisecond)

@@ -5,12 +5,12 @@ tasks:
     cmds:
       - task --list
 
-  install:
+  install.bin_deps:
     desc: "Install dependencies for application work"
     cmds:
-      - GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@latest
+      - go install github.com/pressly/goose/v3/cmd/goose@v3.24.3
 
-  migrate_up:
+  migrate.up:
     desc: "Apply migrations"
     cmds:
       - goose -dir migrations postgres "postgres://order_service_user:Passw0rd@localhost:5435/order_db?sslmode=disable" up
@@ -25,6 +25,16 @@ tasks:
     desc: "Cleaning go mod"
     cmds:
       - go mod tidy
+
+  generator.run:
+    desc: "Run order generator"
+    cmds:
+      - |
+        if [ ! -f "{{.TASKFILE_DIR}}/third_party/order_generator" ]; then
+          echo "Building order generator..."
+          go build -o "{{.TASKFILE_DIR}}/third_party/order_generator" "{{.TASKFILE_DIR}}/third_party"
+        fi
+      - "{{.TASKFILE_DIR}}/third_party/order_generator"
 
   unit:
     desc: "Run unit tests with coverage"
